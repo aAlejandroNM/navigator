@@ -1,6 +1,6 @@
 package com.solvd.navigator;
 
-import com.solvd.navigator.dao.impl.mysql.LocationDAO;
+import com.solvd.navigator.dao.mysql.impl.LocationDao;
 import com.solvd.navigator.model.Location;
 
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) {
         LOGGER.info("=== Navigator DAO Test Started ===");
 
-        LocationDAO locationDAO = new LocationDAO();
+        LocationDao locationDAO = new LocationDao();
 
         Location location = new Location.Builder()
                 .withName("East Park")
@@ -69,12 +69,14 @@ public class Main {
             locationDAO.update(updated);
             LOGGER.info("Location with ID {} updated successfully.", updated.getId());
         }
-
+        /*
         if (saved != null) {
             LOGGER.info("--- Deleting Location ---");
             locationDAO.delete(saved.getId());
             LOGGER.info("Deleted Location with ID: {}", saved.getId());
         }
+
+         */
 
         LOGGER.info("=== Navigator DAO Test Finished ===");
     }

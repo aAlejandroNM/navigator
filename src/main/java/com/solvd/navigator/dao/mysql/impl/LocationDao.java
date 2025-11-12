@@ -1,6 +1,6 @@
-package com.solvd.navigator.dao.impl.mysql;
-
-import com.solvd.navigator.dao.interfaces.ILocationDAO;
+package com.solvd.navigator.dao.mysql.impl;
+import com.solvd.navigator.dao.mysql.BaseDao;
+import com.solvd.navigator.dao.mysql.interfaces.ILocationDao;
 import com.solvd.navigator.model.Location;
 
 import java.sql.*;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class LocationDAO extends BaseDAO implements ILocationDAO {
+public class LocationDao extends BaseDao implements ILocationDao {
 
     private static final String INSERT =
             "INSERT INTO location (name, x, y, type, description) VALUES (?, ?, ?, ?, ?)";

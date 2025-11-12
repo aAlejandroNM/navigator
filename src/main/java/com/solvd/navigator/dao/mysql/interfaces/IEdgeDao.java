@@ -1,4 +1,4 @@
-package com.solvd.navigator.dao.interfaces;
+package com.solvd.navigator.dao.mysql.interfaces;
 
 import com.solvd.navigator.model.Edge;
 import com.solvd.navigator.model.Location;
@@ -6,7 +6,7 @@ import com.solvd.navigator.model.Location;
 import java.util.List;
 import java.util.Optional;
 
-public interface IEdgeDAO {
+public interface IEdgeDao {
     List<Edge> findAll();
     List<Edge> findByLocation(Location location);
     List<Edge> findBetween(Location from, Location to);

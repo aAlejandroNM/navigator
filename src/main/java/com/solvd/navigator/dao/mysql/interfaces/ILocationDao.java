@@ -1,11 +1,11 @@
-package com.solvd.navigator.dao.interfaces;
+package com.solvd.navigator.dao.mysql.interfaces;
 
 import com.solvd.navigator.model.Location;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ILocationDAO {
+public interface ILocationDao {
     List<Location> findAll();
     Optional<Location> findById(Long id);
     Optional<Location> findByName(String name);

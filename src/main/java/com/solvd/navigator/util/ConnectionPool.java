@@ -2,74 +2,66 @@ package com.solvd.navigator.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.DriverManager;
-
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ArrayBlockingQueue;
 
 public class ConnectionPool {
-    private static ConnectionPool cp;
-    private final ArrayBlockingQueue<Connection> pool;
 
-    private static final int POOL_SIZE = 10;
-    private static String URL;
-    private static String USER;
-    private static String PASSWORD;
-    private static String DRIVER;
+    private static ConnectionPool instance;
+    private final List<Connection> connectionPool;
+    private final List<Connection> usedConnections = new ArrayList<>();
+    private static final int INITIAL_POOL_SIZE = 5;
+    private final String url;
+    private final String user;
+    private final String password;
+
 
     private ConnectionPool() throws SQLException {
-        loadProperties();
-
-        try {
-            Class.forName(DRIVER);
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("MySQL Driver not found", e);
-        }
-
-        pool = new ArrayBlockingQueue<>(POOL_SIZE);
-        for (int i = 0; i < POOL_SIZE; i++) {
-            pool.add(DriverManager.getConnection(URL, USER, PASSWORD));
-        }
-    }
-
-    private void loadProperties() throws SQLException {
         Properties props = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("db.properties")) {
-            if (input == null) {
-                throw new SQLException("Unable to find application.properties");
-            }
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
             props.load(input);
-            DRIVER = props.getProperty("driver");
-            URL = props.getProperty("url");
-            USER = props.getProperty("username");
-            PASSWORD = props.getProperty("password");
-
         } catch (IOException e) {
-            throw new SQLException("Failed to load DB properties", e);
+            throw new RuntimeException("Error loading application.properties", e);
+        }
+
+        this.url = props.getProperty("db.url");
+        this.user = props.getProperty("db.user");
+        this.password = props.getProperty("db.password");
+        int poolSize = Integer.parseInt(props.getProperty("db.pool.size", String.valueOf(INITIAL_POOL_SIZE)));
+
+
+        connectionPool = new ArrayList<>(poolSize);
+        for (int i = 0; i < poolSize; i++) {
+            connectionPool.add(createConnection());
         }
     }
 
-    public static synchronized ConnectionPool getConnectionPool() throws SQLException {
-        if (cp == null) {
-            cp = new ConnectionPool();
+    public static synchronized ConnectionPool getInstance() throws SQLException {
+        if (instance == null) {
+            instance = new ConnectionPool();
         }
-        return cp;
+        return instance;
     }
 
-    public Connection getConnection() throws SQLException {
-        try {
-            return pool.take();
-        } catch (InterruptedException e) {
-            throw new SQLException("Interrupted while waiting for a DB connection", e);
+    public synchronized Connection getConnection() {
+        if (connectionPool.isEmpty()) {
+            throw new RuntimeException("Maximum pool size reached, no available connections.");
         }
+        Connection connection = connectionPool.removeLast();
+        usedConnections.add(connection);
+        return connection;
     }
 
-    public void releaseConnection(Connection conn) {
-        if (conn != null) {
-            pool.offer(conn);
-        }
+    public synchronized void releaseConnection(Connection connection) {
+        connectionPool.add(connection);
+        usedConnections.remove(connection);
+    }
+
+    private Connection createConnection() throws SQLException {
+        return DriverManager.getConnection(url, user, password);
     }
 }
