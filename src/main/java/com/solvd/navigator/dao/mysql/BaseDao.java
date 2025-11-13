@@ -1,16 +1,19 @@
-package com.solvd.navigator.dao;
+package com.solvd.navigator.dao.mysql;
 
 import com.solvd.navigator.util.ConnectionPool;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class BaseDao {
+public abstract class BaseDao {
 
     protected final ConnectionPool cp;
 
-    protected BaseDao() throws SQLException {
-        this.cp = ConnectionPool.getInstance();
+    protected BaseDao() {
+        try {
+            this.cp = ConnectionPool.getInstance();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error initializing connection pool", e);
+        }
     }
 
     protected Connection getConnection() {
