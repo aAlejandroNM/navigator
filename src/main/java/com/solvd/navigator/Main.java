@@ -1,83 +1,194 @@
 package com.solvd.navigator;
 
-import com.solvd.navigator.dao.mysql.impl.LocationDao;
+import com.solvd.navigator.controller.NavigationController;
+import com.solvd.navigator.dto.PathResult;
+import com.solvd.navigator.model.Edge;
 import com.solvd.navigator.model.Location;
+import com.solvd.navigator.model.Route;
+import com.solvd.navigator.model.RouteLocation;
+import com.solvd.navigator.service.NavigationService;
+import com.solvd.navigator.service.RouteService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Scanner;
 
 public class Main {
 
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
-        LOGGER.info("=== Navigator DAO Test Started ===");
+        LOGGER.info("=== Sistema de Navegación con Floyd-Warshall ===");
 
-        LocationDao locationDAO = new LocationDao();
+        List<Location> locations = createExampleLocations();
+        LOGGER.info("Ubicaciones creadas: {}", locations.size());
 
-        Location location = new Location.Builder()
-                .withName("East Park")
-                .withX(60.785091)
-                .withY(-103.968285)
-                .withType("Park")
-                .withDescription("A large public park in New York City at East")
+        List<Route> routes = createExampleRoutes(locations);
+        LOGGER.info("Rutas creadas: {}", routes.size());
+
+        List<Edge> edgesFromRoutes = RouteService.convertRoutesToEdges(routes);
+        LOGGER.info("Aristas generadas desde rutas: {}", edgesFromRoutes.size());
+
+        List<Edge> additionalEdges = createAdditionalEdges(locations);
+        edgesFromRoutes.addAll(additionalEdges);
+        LOGGER.info("Total de aristas: {}", edgesFromRoutes.size());
+
+        NavigationService navigationService = new NavigationService(locations, edgesFromRoutes);
+        navigationService.computeShortestPaths();
+        LOGGER.info("Rutas más cortas calculadas usando Floyd-Warshall");
+
+        NavigationController navigationController = new NavigationController(navigationService);
+
+        runNavigationInterface(navigationController, locations);
+
+        LOGGER.info("=== Sistema de Navegación Finalizado ===");
+    }
+
+    private static List<Location> createExampleLocations() {
+        List<Location> locations = new ArrayList<>();
+
+        locations.add(new Location.Builder()
+                .withId(1L)
+                .withName("A")
+                .withX(0.0)
+                .withY(0.0)
+                .withType("Punto")
+                .withDescription("Ubicación A")
+                .build());
+
+        locations.add(new Location.Builder()
+                .withId(2L)
+                .withName("B")
+                .withX(1.0)
+                .withY(0.0)
+                .withType("Punto")
+                .withDescription("Ubicación B")
+                .build());
+
+        locations.add(new Location.Builder()
+                .withId(3L)
+                .withName("C")
+                .withX(2.0)
+                .withY(0.0)
+                .withType("Punto")
+                .withDescription("Ubicación C")
+                .build());
+
+        locations.add(new Location.Builder()
+                .withId(4L)
+                .withName("Z")
+                .withX(3.0)
+                .withY(0.0)
+                .withType("Punto")
+                .withDescription("Ubicación Z")
+                .build());
+
+        return locations;
+    }
+
+    private static List<Route> createExampleRoutes(List<Location> locations) {
+        List<Route> routes = new ArrayList<>();
+
+        // Ruta principal: A -> B -> C -> Z
+        Route mainRoute = new Route.Builder()
+                .withId(1L)
+                .withName("Avenida Principal")
+                .withDescription("Ruta principal que conecta A, B, C y Z")
+                .withLocations(createRouteLocations(locations, new String[]{"A", "B", "C", "Z"}))
                 .build();
 
-        LOGGER.info("--- Saving new Location ---");
-        Location saved = locationDAO.save(location);
-        if (saved != null) {
-            LOGGER.info("Location saved successfully with ID: {}", saved.getId());
-        } else {
-            LOGGER.error("Failed to save the location.");
+        routes.add(mainRoute);
+
+        return routes;
+    }
+
+    private static List<RouteLocation> createRouteLocations(
+            List<Location> allLocations, String[] locationNames) {
+        List<RouteLocation> routeLocations = new ArrayList<>();
+        Route route = new Route.Builder().withId(1L).build();
+
+        for (int index = 0; index < locationNames.length; index++) {
+            Location location = findLocationByName(allLocations, locationNames[index]);
+            if (location != null) {
+                RouteLocation routeLocation = new RouteLocation.Builder()
+                        .withRoute(route)
+                        .withLocation(location)
+                        .withPosition((long) index)
+                        .build();
+                routeLocations.add(routeLocation);
+            }
         }
 
-        if (saved != null) {
-            Optional<Location> fetched = locationDAO.findById(saved.getId());
-            LOGGER.info("--- Fetch by ID ---");
-            fetched.ifPresentOrElse(
-                    loc -> LOGGER.info("Found: {} (ID: {})", loc.getName(), loc.getId()),
-                    () -> LOGGER.warn("Location with ID {} not found", saved.getId())
-            );
-        }
+        return routeLocations;
+    }
 
-        LOGGER.info("--- All Locations ---");
-        List<Location> all = locationDAO.findAll();
-        if (all.isEmpty()) {
-            LOGGER.warn("No locations found in database.");
-        } else {
-            all.forEach(loc -> LOGGER.info("{}: {}", loc.getId(), loc.getName()));
-        }
+    private static Location findLocationByName(List<Location> locations, String name) {
+        return locations.stream()
+                .filter(location -> name.equals(location.getName()))
+                .findFirst()
+                .orElse(null);
+    }
 
-        LOGGER.info("--- Exists by name ---");
-        boolean exists = locationDAO.existsByName("Central Park");
-        LOGGER.info("Exists 'Central Park'? {}", exists);
+    private static List<Edge> createAdditionalEdges(List<Location> locations) {
+        List<Edge> edges = new ArrayList<>();
 
-        if (saved != null) {
-            Location updated = new Location.Builder()
-                    .withId(saved.getId())
-                    .withName("Central Park NYC")
-                    .withX(saved.getX())
-                    .withY(saved.getY())
-                    .withType(saved.getType())
-                    .withDescription("Updated description")
+        Location locationA = findLocationByName(locations, "A");
+        Location locationC = findLocationByName(locations, "C");
+
+        if (locationA != null && locationC != null) {
+            // Direct connection A -> C (shorter than A -> B -> C)
+            double directDistance = RouteService.calculateEuclideanDistance(locationA, locationC);
+            Edge directEdge = new Edge.Builder()
+                    .withFrom(locationA)
+                    .withTo(locationC)
+                    .withWeight(directDistance)
+                    .withDirected(false)
+                    .withName("Conexión directa A-C")
+                    .withActive(true)
                     .build();
-
-            LOGGER.info("--- Updating Location ---");
-            locationDAO.update(updated);
-            LOGGER.info("Location with ID {} updated successfully.", updated.getId());
-        }
-        /*
-        if (saved != null) {
-            LOGGER.info("--- Deleting Location ---");
-            locationDAO.delete(saved.getId());
-            LOGGER.info("Deleted Location with ID: {}", saved.getId());
+            edges.add(directEdge);
         }
 
-         */
+        return edges;
+    }
 
-        LOGGER.info("=== Navigator DAO Test Finished ===");
+
+    private static void runNavigationInterface(
+            NavigationController navigationController, List<Location> locations) {
+        Scanner scanner = new Scanner(System.in);
+
+        LOGGER.info("\n=== Interfaz de Navegación ===");
+        LOGGER.info("Ubicaciones disponibles:");
+        locations.forEach(location -> 
+            LOGGER.info("  - {}", location.getName())
+        );
+
+        try {
+            LOGGER.info("\nIngrese el nombre de la ubicación origen: ");
+            String sourceLocationName = scanner.nextLine().trim();
+
+            LOGGER.info("Ingrese el nombre de la ubicación destino: ");
+            String targetLocationName = scanner.nextLine().trim();
+
+            LOGGER.info("\n[Llamada simulada a endpoint: GET /api/navigation/path]");
+            PathResult pathResult = navigationController.findPath(
+                    sourceLocationName,
+                    targetLocationName
+            );
+
+            LOGGER.info("\n=== Resultado de la Búsqueda ===");
+            LOGGER.info(pathResult.toString());
+
+        } catch (IllegalArgumentException exception) {
+            LOGGER.error("Error: {}", exception.getMessage());
+        } catch (Exception exception) {
+            LOGGER.error("Error inesperado: {}", exception.getMessage());
+            exception.printStackTrace();
+        } finally {
+            scanner.close();
+        }
     }
 }
