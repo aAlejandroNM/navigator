@@ -162,7 +162,7 @@ public class Main {
 
         LOGGER.info("\n=== Interfaz de Navegación ===");
         LOGGER.info("Ubicaciones disponibles:");
-        locations.forEach(location -> 
+        locations.forEach(location ->
             LOGGER.info("  - {}", location.getName())
         );
 
