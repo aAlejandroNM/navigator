@@ -3,7 +3,12 @@ import com.solvd.navigator.dao.mysql.BaseDao;
 import com.solvd.navigator.dao.mysql.interfaces.ILocationDao;
 import com.solvd.navigator.model.Location;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

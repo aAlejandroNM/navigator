@@ -9,6 +9,6 @@ public interface IRouteDao {
     List<Route> findAll();
     Optional<Route> findById(Long id);
     Optional<Route> findByName(String name);
-    void save(Route route);
+    Route save(Route route);
     void delete(Long id);
 }

@@ -13,7 +13,7 @@ public interface IEdgeDao {
     List<Edge> findActive();
     List<Edge> findDirected(boolean directed);
     Optional<Edge> findById(Long id);
-    void save(Edge edge);
+    Edge save(Edge edge);
     void update(Edge edge);
     void delete(Long id);
 }
