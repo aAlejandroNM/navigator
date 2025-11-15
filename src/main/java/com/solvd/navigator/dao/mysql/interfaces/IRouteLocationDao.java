@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface IRouteLocationDao {
     List<RouteLocation> findByRoute(Route route);
-    void save(RouteLocation routeLocation);
+    RouteLocation save(RouteLocation routeLocation);
     void deleteByRoute(Route route);
 }
