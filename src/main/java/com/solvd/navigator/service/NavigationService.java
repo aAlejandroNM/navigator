@@ -87,8 +87,8 @@ public class NavigationService {
             return new PathResult(0.0, new ArrayList<>(), false);
         }
 
-        double[][] distanceMatrix = floydWarshallResult.getDistanceMatrix();
-        Integer[][] nextNodeMatrix = floydWarshallResult.getNextNodeMatrix();
+        double[][] distanceMatrix = floydWarshallResult.distanceMatrix();
+        Integer[][] nextNodeMatrix = floydWarshallResult.nextNodeMatrix();
 
         double totalDistance = distanceMatrix[sourceIndex][targetIndex];
 
