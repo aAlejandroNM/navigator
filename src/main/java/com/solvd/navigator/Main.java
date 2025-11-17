@@ -1,11 +1,23 @@
 package com.solvd.navigator;
 
-import com.solvd.navigator.controller.NavigationController;
-import com.solvd.navigator.dto.PathResult;
 import com.solvd.navigator.model.Edge;
-import com.solvd.navigator.model.Location;
 import com.solvd.navigator.model.Route;
+import com.solvd.navigator.model.Location;
 import com.solvd.navigator.model.RouteLocation;
+
+import com.solvd.navigator.dao.mysql.impl.EdgeDao;
+import com.solvd.navigator.dao.mysql.impl.RouteDao;
+import com.solvd.navigator.dao.mysql.impl.LocationDao;
+import com.solvd.navigator.dao.mysql.impl.RouteLocationDao;
+
+import com.solvd.navigator.dao.mysql.interfaces.IEdgeDao;
+import com.solvd.navigator.dao.mysql.interfaces.IRouteDao;
+import com.solvd.navigator.dao.mysql.interfaces.ILocationDao;
+import com.solvd.navigator.dao.mysql.interfaces.IRouteLocationDao;
+
+import com.solvd.navigator.dto.PathResult;
+import com.solvd.navigator.controller.NavigationController;
+
 import com.solvd.navigator.service.NavigationService;
 import com.solvd.navigator.service.RouteService;
 
@@ -21,30 +33,55 @@ public class Main {
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
-        LOGGER.info("=== Sistema de Navegación con Floyd-Warshall ===");
 
-        List<Location> locations = createExampleLocations();
-        LOGGER.info("Ubicaciones creadas: {}", locations.size());
+        // -----------------------------
+        // 1. Initialize DAO Layer
+        // -----------------------------
+        ILocationDao locationDao = new LocationDao();
+        IEdgeDao edgeDao = new EdgeDao(locationDao);
+        IRouteDao routeDao = new RouteDao();
+        IRouteLocationDao routeLocationDao = new RouteLocationDao(locationDao);
 
-        List<Route> routes = createExampleRoutes(locations);
-        LOGGER.info("Rutas creadas: {}", routes.size());
+        // -----------------------------
+        // 2. Initialize Service Layer
+        // -----------------------------
+        NavigationService navigationService =
+                NavigationService.fromDaos(locationDao, edgeDao, routeDao, routeLocationDao);
 
-        List<Edge> edgesFromRoutes = RouteService.convertRoutesToEdges(routes);
-        LOGGER.info("Aristas generadas desde rutas: {}", edgesFromRoutes.size());
+        // -----------------------------
+        // 3. Initialize Controller
+        // -----------------------------
+        NavigationController controller = new NavigationController(navigationService);
 
-        List<Edge> additionalEdges = createAdditionalEdges(locations);
-        edgesFromRoutes.addAll(additionalEdges);
-        LOGGER.info("Total de aristas: {}", edgesFromRoutes.size());
+        // -----------------------------
+        // 4. CLI user input
+        // -----------------------------
+        Scanner scanner = new Scanner(System.in);
 
-        NavigationService navigationService = new NavigationService(locations, edgesFromRoutes);
-        navigationService.computeShortestPaths();
-        LOGGER.info("Rutas más cortas calculadas usando Floyd-Warshall");
+        System.out.println("=== NAVIGATOR SYSTEM ===");
+        System.out.println("All locations loaded:");
+        controller.getAllLocations()
+                .forEach(loc -> System.out.println("- " + loc.getName()));
 
-        NavigationController navigationController = new NavigationController(navigationService);
+        System.out.print("\nEnter source location: ");
+        String source = scanner.nextLine();
 
-        runNavigationInterface(navigationController, locations);
+        System.out.print("Enter target location: ");
+        String target = scanner.nextLine();
 
-        LOGGER.info("=== Sistema de Navegación Finalizado ===");
+        // -----------------------------
+        // 5. Call Controller
+        // -----------------------------
+        try {
+            PathResult result = controller.findPath(source, target);
+            System.out.println("\n=== RESULT ===");
+            System.out.println(result.toString());
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        scanner.close();
     }
 
     private static List<Location> createExampleLocations() {
