@@ -16,8 +16,8 @@ public record PathResult(
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Distancia total: ").append(totalDistance).append("\n");
-        sb.append("Ruta: ");
+        sb.append("Total distance: ").append(totalDistance).append("\n");
+        sb.append("Route: ");
 
         for (int i = 0; i < pathLocations.size(); i++) {
             sb.append(pathLocations.get(i).getName());

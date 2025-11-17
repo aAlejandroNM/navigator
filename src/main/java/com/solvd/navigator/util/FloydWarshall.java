@@ -2,17 +2,26 @@ package com.solvd.navigator.util;
 
 import com.solvd.navigator.model.Edge;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 public class FloydWarshall {
 
     public static final double INFINITY = Double.POSITIVE_INFINITY;
+    private static final Logger LOGGER = LogManager.getLogger(FloydWarshall.class);
 
     public record Result(double[][] distanceMatrix, Integer[][] nextNodeMatrix) {}
 
     public static Result compute(int numberOfNodes, List<Edge> edges, Map<Long, Integer> idToIndex) {
+
+        LOGGER.debug("Running Floyd–Warshall with {} nodes and {} edges",
+                numberOfNodes, edges.size());
+
         double[][] distanceMatrix = new double[numberOfNodes][numberOfNodes];
         Integer[][] nextNodeMatrix = new Integer[numberOfNodes][numberOfNodes];
 
@@ -77,6 +86,8 @@ public class FloydWarshall {
                         distanceMatrix[intermediateIndex][targetIndex];
 
                     if (distanceThroughIntermediate < distanceMatrix[sourceIndex][targetIndex]) {
+                        LOGGER.trace("Relaxing: {} -> {} via {} | new distance = {}",
+                                sourceIndex, targetIndex, intermediateIndex, distanceThroughIntermediate);
                         distanceMatrix[sourceIndex][targetIndex] = distanceThroughIntermediate;
                         nextNodeMatrix[sourceIndex][targetIndex] = nextNodeMatrix[sourceIndex][intermediateIndex];
                     }

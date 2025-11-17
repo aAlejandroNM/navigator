@@ -13,6 +13,9 @@ import com.solvd.navigator.dao.mysql.interfaces.IRouteDao;
 import com.solvd.navigator.dao.mysql.interfaces.ILocationDao;
 import com.solvd.navigator.dao.mysql.interfaces.IRouteLocationDao;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,8 @@ public class NavigationService {
     private final Map<Integer, Location> indexToLocationMap;
     private FloydWarshall.Result floydWarshallResult;
     private boolean isComputed;
+
+    private static final Logger LOGGER = LogManager.getLogger(NavigationService.class);
 
     public NavigationService(List<Location> locations, List<Edge> edges) {
         this.locations = locations != null ? new ArrayList<>(locations) : new ArrayList<>();
@@ -48,7 +53,7 @@ public class NavigationService {
 
     public void computeShortestPaths() {
         if (locations.isEmpty()) {
-            throw new IllegalStateException("No hay ubicaciones disponibles para calcular rutas.");
+            throw new IllegalStateException("There are no locations available for route calculation.");
         }
 
         floydWarshallResult = FloydWarshall.compute(
@@ -65,10 +70,14 @@ public class NavigationService {
             computeShortestPaths();
         }
 
+        LOGGER.info("Finding path from '{}' to '{}'", sourceLocationName, targetLocationName);
+
         Location sourceLocation = findLocationByName(sourceLocationName);
         Location targetLocation = findLocationByName(targetLocationName);
 
         if (sourceLocation == null || targetLocation == null) {
+            LOGGER.warn("Locations not found: source='{}', target='{}'",
+                    sourceLocationName, targetLocationName);
             return new PathResult(0.0, new ArrayList<>(), false);
         }
 
@@ -83,6 +92,8 @@ public class NavigationService {
         Integer sourceIndex = locationToIndexMap.get(sourceLocation.getId());
         Integer targetIndex = locationToIndexMap.get(targetLocation.getId());
 
+        LOGGER.debug("Indexes resolved: {} -> {}", sourceIndex, targetIndex);
+
         if (sourceIndex == null || targetIndex == null) {
             return new PathResult(0.0, new ArrayList<>(), false);
         }
@@ -93,8 +104,15 @@ public class NavigationService {
         double totalDistance = distanceMatrix[sourceIndex][targetIndex];
 
         if (Double.isInfinite(totalDistance)) {
+            LOGGER.warn("No path exists between '{}' and '{}'",
+                    sourceLocation.getName(), targetLocation.getName());
             return new PathResult(0.0, new ArrayList<>(), false);
         }
+
+        LOGGER.debug("Shortest distance from '{}' to '{}' = {}",
+                sourceLocation.getName(),
+                targetLocation.getName(),
+                totalDistance);
 
         List<Integer> pathIndices = FloydWarshall.reconstructPath(
                 nextNodeMatrix,
