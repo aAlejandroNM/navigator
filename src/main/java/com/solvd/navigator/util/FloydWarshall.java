@@ -1,7 +1,6 @@
 package com.solvd.navigator.util;
 
 import com.solvd.navigator.model.Edge;
-import com.solvd.navigator.model.Location;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,23 +10,7 @@ public class FloydWarshall {
 
     public static final double INFINITY = Double.POSITIVE_INFINITY;
 
-    public static class Result {
-        private final double[][] distanceMatrix;
-        private final Integer[][] nextNodeMatrix;
-
-        public Result(double[][] distanceMatrix, Integer[][] nextNodeMatrix) {
-            this.distanceMatrix = distanceMatrix;
-            this.nextNodeMatrix = nextNodeMatrix;
-        }
-
-        public double[][] getDistanceMatrix() {
-            return distanceMatrix;
-        }
-
-        public Integer[][] getNextNodeMatrix() {
-            return nextNodeMatrix;
-        }
-    }
+    public record Result(double[][] distanceMatrix, Integer[][] nextNodeMatrix) {}
 
     public static Result compute(int numberOfNodes, List<Edge> edges, Map<Long, Integer> idToIndex) {
         double[][] distanceMatrix = new double[numberOfNodes][numberOfNodes];
@@ -110,15 +93,16 @@ public class FloydWarshall {
         }
 
         List<Integer> path = new ArrayList<>();
-        Integer currentNodeIndex = sourceIndex;
-        path.add(currentNodeIndex);
+        int current = sourceIndex;
+        path.add(current);
 
-        while (currentNodeIndex != null && currentNodeIndex != targetIndex) {
-            currentNodeIndex = nextNodeMatrix[currentNodeIndex][targetIndex];
-            if (currentNodeIndex == null) {
-                return Collections.emptyList();
+        while (current != targetIndex) {
+            Integer next = nextNodeMatrix[current][targetIndex];
+            if (next == null) {
+                return Collections.emptyList(); // no valid path
             }
-            path.add(currentNodeIndex);
+            current = next;
+            path.add(current);
         }
 
         return path;
