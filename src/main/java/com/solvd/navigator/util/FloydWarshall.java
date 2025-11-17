@@ -29,7 +29,7 @@ public class FloydWarshall {
         }
     }
 
-    public static Result compute(int numberOfNodes, List<Edge> edges, Map<Location, Integer> locationToIndex) {
+    public static Result compute(int numberOfNodes, List<Edge> edges, Map<Long, Integer> idToIndex) {
         double[][] distanceMatrix = new double[numberOfNodes][numberOfNodes];
         Integer[][] nextNodeMatrix = new Integer[numberOfNodes][numberOfNodes];
 
@@ -46,8 +46,15 @@ public class FloydWarshall {
 
         // Establish initial distances from the edges
         for (Edge edge : edges) {
-            Integer fromIndex = locationToIndex.get(edge.getFrom());
-            Integer toIndex = locationToIndex.get(edge.getTo());
+            Long fromId = edge.getFrom() != null ? edge.getFrom().getId() : null;
+            Long toId   = edge.getTo()   != null ? edge.getTo().getId()   : null;
+
+            if (fromId == null || toId == null) {
+                continue;
+            }
+
+            Integer fromIndex = idToIndex.get(fromId);
+            Integer toIndex = idToIndex.get(toId);
 
             if (fromIndex != null && toIndex != null) {
                 double currentWeight = distanceMatrix[fromIndex][toIndex];

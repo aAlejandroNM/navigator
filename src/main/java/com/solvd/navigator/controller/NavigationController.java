@@ -44,4 +44,3 @@ public class NavigationController {
                 .anyMatch(location -> locationName.equalsIgnoreCase(location.getName()));
     }
 }
-
