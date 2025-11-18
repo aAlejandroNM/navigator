@@ -1,5 +1,6 @@
 package com.solvd.navigator;
 
+import com.solvd.navigator.controller.CliController;
 import com.solvd.navigator.dao.mysql.impl.EdgeDao;
 import com.solvd.navigator.dao.mysql.impl.RouteDao;
 import com.solvd.navigator.dao.mysql.impl.LocationDao;
@@ -10,15 +11,10 @@ import com.solvd.navigator.dao.mysql.interfaces.IRouteDao;
 import com.solvd.navigator.dao.mysql.interfaces.ILocationDao;
 import com.solvd.navigator.dao.mysql.interfaces.IRouteLocationDao;
 
-import com.solvd.navigator.dto.PathResult;
-import com.solvd.navigator.controller.NavigationController;
-
 import com.solvd.navigator.service.NavigationService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Scanner;
 
 public class Main {
 
@@ -40,39 +36,7 @@ public class Main {
         NavigationService navigationService =
                 NavigationService.fromDaos(locationDao, edgeDao, routeDao, routeLocationDao);
 
-        // -----------------------------
-        // 3. Initialize Controller
-        // -----------------------------
-        NavigationController controller = new NavigationController(navigationService);
-
-        // -----------------------------
-        // 4. CLI user input
-        // -----------------------------
-        Scanner scanner = new Scanner(System.in);
-
-        LOGGER.info("=== NAVIGATOR SYSTEM ===");
-        LOGGER.debug("All locations loaded:");
-        controller.getAllLocations()
-                .forEach(loc -> LOGGER.info("- " + loc.getName()));
-
-        LOGGER.info("\nEnter source location: ");
-        String source = scanner.nextLine();
-
-        LOGGER.info("Enter target location: ");
-        String target = scanner.nextLine();
-
-        // -----------------------------
-        // 5. Call Controller
-        // -----------------------------
-        try {
-            PathResult result = controller.findPath(source, target);
-            LOGGER.info("\n=== RESULT ===");
-            LOGGER.info(result.toString());
-
-        } catch (Exception e) {
-            LOGGER.error("Error: {}", e.getMessage());
-        }
-
-        scanner.close();
+        CliController cli = new CliController(navigationService);
+        cli.start();
     }
 }
