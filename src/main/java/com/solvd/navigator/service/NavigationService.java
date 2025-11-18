@@ -145,10 +145,6 @@ public class NavigationService {
         return null;
     }
 
-    public List<Location> getAllLocations() {
-        return new ArrayList<>(locations);
-    }
-
     public boolean isComputed() {
         return isComputed;
     }
