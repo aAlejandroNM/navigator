@@ -17,6 +17,13 @@ public class RouteService {
         return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 
+    /**
+     * Converts a Route (loaded from DB along with its RouteLocation list)
+     * into in-memory edges that connect consecutive locations.
+     *
+     * These edges are NOT saved to DB. They are used only for building the
+     * graph for Floyd–Warshall and NavigationService.
+     */
     public static List<Edge> convertRouteToEdges(Route route) {
         List<Edge> edges = new ArrayList<>();
 

@@ -1,35 +1,27 @@
 package com.solvd.navigator.util;
 
 import com.solvd.navigator.model.Edge;
-import com.solvd.navigator.model.Location;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 public class FloydWarshall {
 
     public static final double INFINITY = Double.POSITIVE_INFINITY;
+    private static final Logger LOGGER = LogManager.getLogger(FloydWarshall.class);
 
-    public static class Result {
-        private final double[][] distanceMatrix;
-        private final Integer[][] nextNodeMatrix;
+    public record Result(double[][] distanceMatrix, Integer[][] nextNodeMatrix) {}
 
-        public Result(double[][] distanceMatrix, Integer[][] nextNodeMatrix) {
-            this.distanceMatrix = distanceMatrix;
-            this.nextNodeMatrix = nextNodeMatrix;
-        }
+    public static Result compute(int numberOfNodes, List<Edge> edges, Map<Long, Integer> idToIndex) {
 
-        public double[][] getDistanceMatrix() {
-            return distanceMatrix;
-        }
+        LOGGER.debug("Running Floyd–Warshall with {} nodes and {} edges",
+                numberOfNodes, edges.size());
 
-        public Integer[][] getNextNodeMatrix() {
-            return nextNodeMatrix;
-        }
-    }
-
-    public static Result compute(int numberOfNodes, List<Edge> edges, Map<Location, Integer> locationToIndex) {
         double[][] distanceMatrix = new double[numberOfNodes][numberOfNodes];
         Integer[][] nextNodeMatrix = new Integer[numberOfNodes][numberOfNodes];
 
@@ -46,8 +38,15 @@ public class FloydWarshall {
 
         // Establish initial distances from the edges
         for (Edge edge : edges) {
-            Integer fromIndex = locationToIndex.get(edge.getFrom());
-            Integer toIndex = locationToIndex.get(edge.getTo());
+            Long fromId = edge.getFrom() != null ? edge.getFrom().getId() : null;
+            Long toId   = edge.getTo()   != null ? edge.getTo().getId()   : null;
+
+            if (fromId == null || toId == null) {
+                continue;
+            }
+
+            Integer fromIndex = idToIndex.get(fromId);
+            Integer toIndex = idToIndex.get(toId);
 
             if (fromIndex != null && toIndex != null) {
                 double currentWeight = distanceMatrix[fromIndex][toIndex];
@@ -87,6 +86,8 @@ public class FloydWarshall {
                         distanceMatrix[intermediateIndex][targetIndex];
 
                     if (distanceThroughIntermediate < distanceMatrix[sourceIndex][targetIndex]) {
+                        LOGGER.trace("Relaxing: {} -> {} via {} | new distance = {}",
+                                sourceIndex, targetIndex, intermediateIndex, distanceThroughIntermediate);
                         distanceMatrix[sourceIndex][targetIndex] = distanceThroughIntermediate;
                         nextNodeMatrix[sourceIndex][targetIndex] = nextNodeMatrix[sourceIndex][intermediateIndex];
                     }
@@ -103,15 +104,16 @@ public class FloydWarshall {
         }
 
         List<Integer> path = new ArrayList<>();
-        Integer currentNodeIndex = sourceIndex;
-        path.add(currentNodeIndex);
+        int current = sourceIndex;
+        path.add(current);
 
-        while (currentNodeIndex != null && currentNodeIndex != targetIndex) {
-            currentNodeIndex = nextNodeMatrix[currentNodeIndex][targetIndex];
-            if (currentNodeIndex == null) {
-                return Collections.emptyList();
+        while (current != targetIndex) {
+            Integer next = nextNodeMatrix[current][targetIndex];
+            if (next == null) {
+                return Collections.emptyList(); // no valid path
             }
-            path.add(currentNodeIndex);
+            current = next;
+            path.add(current);
         }
 
         return path;
