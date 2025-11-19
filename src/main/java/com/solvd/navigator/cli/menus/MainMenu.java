@@ -1,6 +1,8 @@
 package com.solvd.navigator.cli.menus;
 
+import com.solvd.navigator.controller.EdgeController;
 import com.solvd.navigator.controller.NavigationController;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,10 +13,12 @@ public class MainMenu {
     private static final Logger LOGGER = LogManager.getLogger(MainMenu.class);
 
     private final NavigationController controller;
+    private final EdgeController edgeController;
     private final Scanner scanner;
 
-    public MainMenu(NavigationController controller, Scanner scanner) {
+    public MainMenu(NavigationController controller, EdgeController edgeController,Scanner scanner) {
         this.controller = controller;
+        this.edgeController = edgeController;
         this.scanner = scanner;
     }
 
@@ -24,7 +28,8 @@ public class MainMenu {
         while (running) {
             LOGGER.info("\n=== NAVIGATOR MENU ===");
             LOGGER.info("1. Location options");
-            LOGGER.info("2. Find shortest route");
+            LOGGER.info("2. Edge options");
+            LOGGER.info("3. Find shortest route");
             LOGGER.info("Q. Quit");
             LOGGER.info("Choose an option: ");
 
@@ -36,6 +41,10 @@ public class MainMenu {
                     break;
 
                 case "2":
+                    new EdgeMenu(edgeController, scanner).start();
+                    break;
+
+                case "3":
                     runFindShortestRoute();
                     break;
 
@@ -71,5 +80,4 @@ public class MainMenu {
             LOGGER.error("Error calculating shortest route: {}", e.getMessage());
         }
     }
-
 }
