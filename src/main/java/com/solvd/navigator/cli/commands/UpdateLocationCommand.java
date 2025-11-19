@@ -1,7 +1,7 @@
 package com.solvd.navigator.cli.commands;
 
 import com.solvd.navigator.cli.Command;
-import com.solvd.navigator.service.LocationService;
+import com.solvd.navigator.controller.NavigationController;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,23 +10,19 @@ import java.util.Scanner;
 
 public class UpdateLocationCommand implements Command {
 
-    private final LocationService locationService;
+    private final NavigationController controller;
     private final Scanner scanner = new Scanner(System.in);
     private static final Logger LOGGER = LogManager.getLogger(UpdateLocationCommand.class);
 
-    public UpdateLocationCommand(LocationService locationService) {
-        this.locationService = locationService;
+    public UpdateLocationCommand(NavigationController controller) {
+        this.controller = controller;
     }
 
     @Override
-    public String name() {
-        return "Update a location";
-    }
+    public String name() { return "Update a location"; }
 
     @Override
-    public String key() {
-        return "3";
-    }
+    public String key() { return "3"; }
 
     @Override
     public void execute() {
@@ -48,8 +44,7 @@ public class UpdateLocationCommand implements Command {
         LOGGER.info("New type: ");
         String type = scanner.nextLine();
 
-        boolean ok = locationService.updateLocation(id, name, desc, x, y, type);
-
+        boolean ok = controller.updateLocation(id, name, desc, x, y, type);
         LOGGER.info(ok ? "Updated successfully." : "Location not found.");
     }
 }

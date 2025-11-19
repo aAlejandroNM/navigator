@@ -2,7 +2,7 @@ package com.solvd.navigator.cli.commands;
 
 import com.solvd.navigator.cli.Command;
 import com.solvd.navigator.model.Location;
-import com.solvd.navigator.service.LocationService;
+import com.solvd.navigator.controller.NavigationController;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,23 +11,19 @@ import java.util.Scanner;
 
 public class AddLocationCommand implements Command {
 
-    private final LocationService locationService;
+    private final NavigationController controller;
     private final Scanner scanner = new Scanner(System.in);
     private static final Logger LOGGER = LogManager.getLogger(AddLocationCommand.class);
 
-    public AddLocationCommand(LocationService locationService) {
-        this.locationService = locationService;
+    public AddLocationCommand(NavigationController controller) {
+        this.controller = controller;
     }
 
     @Override
-    public String name() {
-        return "Add a new location";
-    }
+    public String name() { return "Add a new location"; }
 
     @Override
-    public String key() {
-        return "2";
-    }
+    public String key() { return "2"; }
 
     @Override
     public void execute() {
@@ -46,7 +42,7 @@ public class AddLocationCommand implements Command {
         LOGGER.info("Type (CITY, AIRPORT, etc.): ");
         String type = scanner.nextLine();
 
-        Location created = locationService.addLocation(name, desc, x, y, type);
+        Location created = controller.addLocation(name, desc, x, y, type);
         LOGGER.info("Location added with ID: {}", created.getId());
     }
 }

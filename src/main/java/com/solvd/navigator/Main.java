@@ -5,6 +5,7 @@ import com.solvd.navigator.cli.CommandRegistry;
 
 import com.solvd.navigator.cli.commands.*;
 
+import com.solvd.navigator.controller.NavigationController;
 import com.solvd.navigator.dao.mysql.impl.EdgeDao;
 import com.solvd.navigator.dao.mysql.impl.LocationDao;
 import com.solvd.navigator.dao.mysql.impl.RouteDao;
@@ -47,20 +48,25 @@ public class Main {
         );
 
         // -----------------------------
-        // 3. COMMAND REGISTRY
+        // 3. CONTROLLER LAYER
+        // -----------------------------
+        NavigationController controller = new NavigationController(locationService, navigationService);
+
+        // -----------------------------
+        // 4. COMMAND REGISTRY
         // -----------------------------
         CommandRegistry registry = new CommandRegistry();
 
-        registry.register(new AddLocationCommand(locationService));
-        registry.register(new DeleteLocationCommand(locationService));
-        registry.register(new UpdateLocationCommand(locationService));
-        registry.register(new ListLocationsCommand(locationService));
-        registry.register(new FindRouteCommand(navigationService));
+        registry.register(new AddLocationCommand(controller));
+        registry.register(new DeleteLocationCommand(controller));
+        registry.register(new UpdateLocationCommand(controller));
+        registry.register(new ListLocationsCommand(controller));
+        registry.register(new FindRouteCommand(controller));
 
         LOGGER.info("Registered {} CLI commands.", registry.getAll().size());
 
         // -----------------------------
-        // 4. START CLI
+        // 5. START CLI
         // -----------------------------
         CliController cli = new CliController(registry);
         cli.start();
