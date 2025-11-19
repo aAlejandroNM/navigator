@@ -1,18 +1,16 @@
 package com.solvd.navigator.controller;
 
 import com.solvd.navigator.dto.PathResult;
-import com.solvd.navigator.model.Location;
 import com.solvd.navigator.service.NavigationService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-
 public class NavigationController {
 
-    private final NavigationService navigationService;
     private static final Logger LOGGER = LogManager.getLogger(NavigationController.class);
+
+    private final NavigationService navigationService;
 
     public NavigationController(NavigationService navigationService) {
         this.navigationService = navigationService;
@@ -34,20 +32,5 @@ public class NavigationController {
                 sourceLocationName.trim(),
                 targetLocationName.trim()
         );
-    }
-
-    public List<Location> getAllLocations() {
-        return navigationService.getAllLocations();
-    }
-
-
-    public boolean locationExists(String locationName) {
-        if (locationName == null || locationName.trim().isEmpty()) {
-            return false;
-        }
-
-        List<Location> locations = navigationService.getAllLocations();
-        return locations.stream()
-                .anyMatch(location -> locationName.equalsIgnoreCase(location.getName()));
     }
 }

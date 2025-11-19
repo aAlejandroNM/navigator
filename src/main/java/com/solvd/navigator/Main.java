@@ -1,18 +1,20 @@
 package com.solvd.navigator;
 
-import com.solvd.navigator.dao.mysql.impl.EdgeDao;
-import com.solvd.navigator.dao.mysql.impl.RouteDao;
-import com.solvd.navigator.dao.mysql.impl.LocationDao;
-import com.solvd.navigator.dao.mysql.impl.RouteLocationDao;
-
-import com.solvd.navigator.dao.mysql.interfaces.IEdgeDao;
-import com.solvd.navigator.dao.mysql.interfaces.IRouteDao;
-import com.solvd.navigator.dao.mysql.interfaces.ILocationDao;
-import com.solvd.navigator.dao.mysql.interfaces.IRouteLocationDao;
-
-import com.solvd.navigator.dto.PathResult;
+import com.solvd.navigator.cli.menus.MainMenu;
+import com.solvd.navigator.controller.EdgeController;
+import com.solvd.navigator.controller.LocationController;
 import com.solvd.navigator.controller.NavigationController;
 
+import com.solvd.navigator.controller.RouteController;
+import com.solvd.navigator.dao.mysql.impl.EdgeDao;
+import com.solvd.navigator.dao.mysql.impl.LocationDao;
+import com.solvd.navigator.dao.mysql.impl.RouteDao;
+import com.solvd.navigator.dao.mysql.impl.RouteLocationDao;
+
+import com.solvd.navigator.dao.mysql.interfaces.*;
+
+import com.solvd.navigator.service.EdgeService;
+import com.solvd.navigator.service.LocationService;
 import com.solvd.navigator.service.NavigationService;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,53 +28,46 @@ public class Main {
 
     public static void main(String[] args) {
 
+        LOGGER.info("Starting Navigator Application...");
+
         // -----------------------------
-        // 1. Initialize DAO Layer
+        // 1. DAO LAYER
         // -----------------------------
         ILocationDao locationDao = new LocationDao();
         IEdgeDao edgeDao = new EdgeDao(locationDao);
-        IRouteDao routeDao = new RouteDao();
         IRouteLocationDao routeLocationDao = new RouteLocationDao(locationDao);
+        IRouteDao routeDao = new RouteDao(routeLocationDao);
 
         // -----------------------------
-        // 2. Initialize Service Layer
+        // 2. SERVICE LAYER
         // -----------------------------
-        NavigationService navigationService =
-                NavigationService.fromDaos(locationDao, edgeDao, routeDao, routeLocationDao);
+        LocationService locationService = new LocationService(locationDao, edgeDao, routeLocationDao);
+        EdgeService edgeService = new EdgeService(edgeDao, locationDao);
+
+        NavigationService navigationService = NavigationService.fromDaos(
+                locationDao,
+                edgeDao,
+                routeDao,
+                routeLocationDao
+        );
 
         // -----------------------------
-        // 3. Initialize Controller
+        // 3. CONTROLLER
         // -----------------------------
-        NavigationController controller = new NavigationController(navigationService);
+        NavigationController navigationController =
+                new NavigationController(navigationService);
+        LocationController locationController = new LocationController(locationService);
+        EdgeController edgeController = new EdgeController(edgeService);
+        RouteController routeController = new RouteController(routeDao, locationDao, routeLocationDao);
 
         // -----------------------------
-        // 4. CLI user input
+        // 4. MENUS
         // -----------------------------
         Scanner scanner = new Scanner(System.in);
 
-        LOGGER.info("=== NAVIGATOR SYSTEM ===");
-        LOGGER.debug("All locations loaded:");
-        controller.getAllLocations()
-                .forEach(loc -> LOGGER.info("- " + loc.getName()));
+        MainMenu mainMenu = new MainMenu(navigationController, locationController, edgeController, routeController, scanner);
+        mainMenu.start();
 
-        LOGGER.info("\nEnter source location: ");
-        String source = scanner.nextLine();
-
-        LOGGER.info("Enter target location: ");
-        String target = scanner.nextLine();
-
-        // -----------------------------
-        // 5. Call Controller
-        // -----------------------------
-        try {
-            PathResult result = controller.findPath(source, target);
-            LOGGER.info("\n=== RESULT ===");
-            LOGGER.info(result.toString());
-
-        } catch (Exception e) {
-            LOGGER.error("Error: {}", e.getMessage());
-        }
-
-        scanner.close();
+        LOGGER.info("Navigator Application closed.");
     }
 }

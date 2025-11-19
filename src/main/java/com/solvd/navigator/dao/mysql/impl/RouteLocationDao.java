@@ -23,6 +23,9 @@ public class RouteLocationDao extends BaseDao implements IRouteLocationDao {
         this.locationDao = locationDao;
     }
 
+    private static final String FIND_BY_LOCATION =
+            "SELECT * FROM route_location WHERE location_id=? ORDER BY position ASC";
+
     private static final String FIND_BY_ROUTE =
             "SELECT * FROM route_location WHERE route_id=? ORDER BY position ASC";
 
@@ -31,6 +34,9 @@ public class RouteLocationDao extends BaseDao implements IRouteLocationDao {
 
     private static final String DELETE_BY_ROUTE =
             "DELETE FROM route_location WHERE route_id=?";
+
+    private static final String DELETE_BY_LOCATION =
+            "DELETE FROM route_location WHERE location_id=?";
 
     private RouteLocation map(ResultSet rs, Route route) throws SQLException {
 
@@ -41,6 +47,37 @@ public class RouteLocationDao extends BaseDao implements IRouteLocationDao {
                 .withLocation(location)
                 .withPosition(rs.getLong("position"))
                 .build();
+    }
+
+    @Override
+    public List<RouteLocation> findByLocation(Location location) {
+        List<RouteLocation> list = new ArrayList<>();
+        Connection conn = null;
+
+        try {
+            conn = getConnection();
+
+            try (PreparedStatement ps = conn.prepareStatement(FIND_BY_LOCATION)) {
+                ps.setLong(1, location.getId());
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Route route = new Route.Builder()
+                                .withId(rs.getLong("route_id"))
+                                .build();
+
+                        list.add(map(rs, route));
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            releaseConnection(conn);
+        }
+
+        return list;
     }
 
     @Override
@@ -99,6 +136,25 @@ public class RouteLocationDao extends BaseDao implements IRouteLocationDao {
             conn = getConnection();
             try (PreparedStatement ps = conn.prepareStatement(DELETE_BY_ROUTE)) {
                 ps.setLong(1, route.getId());
+                ps.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            releaseConnection(conn);
+        }
+    }
+
+    @Override
+    public void deleteByLocation(Location location) {
+        Connection conn = null;
+
+        try {
+            conn = getConnection();
+
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_BY_LOCATION)) {
+                ps.setLong(1, location.getId());
                 ps.executeUpdate();
             }
 
