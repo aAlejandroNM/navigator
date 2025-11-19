@@ -1,19 +1,15 @@
-package com.solvd.navigator.cli.commands;
+package com.solvd.navigator.cli.commands.location;
 
 import com.solvd.navigator.cli.Command;
 import com.solvd.navigator.model.Location;
 import com.solvd.navigator.cli.util.PaginationUtil;
 import com.solvd.navigator.controller.NavigationController;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.List;
 
 public class ListLocationsCommand implements Command {
 
     private final NavigationController controller;
-    private static final Logger LOGGER = LogManager.getLogger(ListLocationsCommand.class);
 
     public ListLocationsCommand(NavigationController controller) {
         this.controller = controller;

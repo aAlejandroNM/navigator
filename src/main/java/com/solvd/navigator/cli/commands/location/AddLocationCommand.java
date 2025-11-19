@@ -1,4 +1,4 @@
-package com.solvd.navigator.cli.commands;
+package com.solvd.navigator.cli.commands.location;
 
 import com.solvd.navigator.cli.Command;
 import com.solvd.navigator.model.Location;

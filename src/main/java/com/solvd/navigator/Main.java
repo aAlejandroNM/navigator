@@ -1,11 +1,8 @@
 package com.solvd.navigator;
 
-import com.solvd.navigator.cli.CliController;
-import com.solvd.navigator.cli.CommandRegistry;
-
-import com.solvd.navigator.cli.commands.*;
-
+import com.solvd.navigator.cli.menus.MainMenu;
 import com.solvd.navigator.controller.NavigationController;
+
 import com.solvd.navigator.dao.mysql.impl.EdgeDao;
 import com.solvd.navigator.dao.mysql.impl.LocationDao;
 import com.solvd.navigator.dao.mysql.impl.RouteDao;
@@ -18,6 +15,8 @@ import com.solvd.navigator.service.NavigationService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Scanner;
 
 public class Main {
 
@@ -48,27 +47,19 @@ public class Main {
         );
 
         // -----------------------------
-        // 3. CONTROLLER LAYER
+        // 3. CONTROLLER
         // -----------------------------
-        NavigationController controller = new NavigationController(locationService, navigationService);
+        NavigationController controller =
+                new NavigationController(locationService, navigationService);
 
         // -----------------------------
-        // 4. COMMAND REGISTRY
+        // 4. MENUS
         // -----------------------------
-        CommandRegistry registry = new CommandRegistry();
+        Scanner scanner = new Scanner(System.in);
 
-        registry.register(new AddLocationCommand(controller));
-        registry.register(new DeleteLocationCommand(controller));
-        registry.register(new UpdateLocationCommand(controller));
-        registry.register(new ListLocationsCommand(controller));
-        registry.register(new FindRouteCommand(controller));
+        MainMenu mainMenu = new MainMenu(controller, scanner);
+        mainMenu.start();
 
-        LOGGER.info("Registered {} CLI commands.", registry.getAll().size());
-
-        // -----------------------------
-        // 5. START CLI
-        // -----------------------------
-        CliController cli = new CliController(registry);
-        cli.start();
+        LOGGER.info("Navigator Application closed.");
     }
 }
