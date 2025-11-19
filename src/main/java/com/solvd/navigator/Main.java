@@ -5,6 +5,7 @@ import com.solvd.navigator.controller.EdgeController;
 import com.solvd.navigator.controller.LocationController;
 import com.solvd.navigator.controller.NavigationController;
 
+import com.solvd.navigator.controller.RouteController;
 import com.solvd.navigator.dao.mysql.impl.EdgeDao;
 import com.solvd.navigator.dao.mysql.impl.LocationDao;
 import com.solvd.navigator.dao.mysql.impl.RouteDao;
@@ -32,10 +33,10 @@ public class Main {
         // -----------------------------
         // 1. DAO LAYER
         // -----------------------------
-        IRouteDao routeDao = new RouteDao();
         ILocationDao locationDao = new LocationDao();
         IEdgeDao edgeDao = new EdgeDao(locationDao);
         IRouteLocationDao routeLocationDao = new RouteLocationDao(locationDao);
+        IRouteDao routeDao = new RouteDao(routeLocationDao);
 
         // -----------------------------
         // 2. SERVICE LAYER
@@ -57,13 +58,14 @@ public class Main {
                 new NavigationController(navigationService);
         LocationController locationController = new LocationController(locationService);
         EdgeController edgeController = new EdgeController(edgeService);
+        RouteController routeController = new RouteController(routeDao, locationDao, routeLocationDao);
 
         // -----------------------------
         // 4. MENUS
         // -----------------------------
         Scanner scanner = new Scanner(System.in);
 
-        MainMenu mainMenu = new MainMenu(navigationController, locationController, edgeController, scanner);
+        MainMenu mainMenu = new MainMenu(navigationController, locationController, edgeController, routeController, scanner);
         mainMenu.start();
 
         LOGGER.info("Navigator Application closed.");

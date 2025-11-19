@@ -2,7 +2,9 @@ package com.solvd.navigator.dao.mysql.impl;
 
 import com.solvd.navigator.model.Route;
 import com.solvd.navigator.dao.mysql.BaseDao;
+import com.solvd.navigator.model.RouteLocation;
 import com.solvd.navigator.dao.mysql.interfaces.IRouteDao;
+import com.solvd.navigator.dao.mysql.interfaces.IRouteLocationDao;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -15,6 +17,12 @@ import java.util.Optional;
 import java.util.ArrayList;
 
 public class RouteDao extends BaseDao implements IRouteDao {
+
+    private final IRouteLocationDao routeLocationDao;
+
+    public RouteDao(IRouteLocationDao routeLocationDao) {
+        this.routeLocationDao = routeLocationDao;
+    }
 
     private static final String FIND_ALL =
             "SELECT * FROM route";
@@ -49,7 +57,20 @@ public class RouteDao extends BaseDao implements IRouteDao {
             try (PreparedStatement ps = conn.prepareStatement(FIND_ALL);
                  ResultSet rs = ps.executeQuery()) {
 
-                while (rs.next()) routes.add(map(rs));
+                while (rs.next()) {
+                    Route route = map(rs);
+
+                    List<RouteLocation> locations = routeLocationDao.findByRoute(route);
+
+                    route = new Route.Builder()
+                            .withId(route.getId())
+                            .withName(route.getName())
+                            .withDescription(route.getDescription())
+                            .withLocations(locations)
+                            .build();
+
+                    routes.add(route);
+                }
             }
 
         } catch (SQLException e) {
@@ -63,6 +84,7 @@ public class RouteDao extends BaseDao implements IRouteDao {
     @Override
     public Optional<Route> findById(Long id) {
         Connection conn = null;
+        Optional<Route> routeOpt = Optional.empty();
 
         try {
             conn = getConnection();
@@ -71,17 +93,29 @@ public class RouteDao extends BaseDao implements IRouteDao {
                 ps.setLong(1, id);
 
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return Optional.of(map(rs));
+                    if (rs.next()) {
+                        Route route = map(rs);
+
+                        List<RouteLocation> locations = routeLocationDao.findByRoute(route);
+
+                        route = new Route.Builder()
+                                .withId(route.getId())
+                                .withName(route.getName())
+                                .withDescription(route.getDescription())
+                                .withLocations(locations)
+                                .build();
+
+                        routeOpt = Optional.of(route);
+                    }
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             releaseConnection(conn);
         }
 
-        return Optional.empty();
+        return routeOpt;
     }
 
     @Override

@@ -73,7 +73,6 @@ public class LocationService {
 
         Location loc = opt.get();
 
-        // 1. Edge dependency check
         List<Edge> edges = edgeDao.findByLocation(loc);
         if (!edges.isEmpty()) {
             throw new IllegalStateException(
@@ -81,7 +80,6 @@ public class LocationService {
             );
         }
 
-        // 2. Route dependency check
         List<RouteLocation> routeLocations = routeLocationDao.findByLocation(loc);
         if (!routeLocations.isEmpty()) {
             throw new IllegalStateException(

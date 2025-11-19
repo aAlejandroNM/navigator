@@ -1,6 +1,7 @@
 package com.solvd.navigator.cli.menus;
 
 import com.solvd.navigator.controller.EdgeController;
+import com.solvd.navigator.controller.RouteController;
 import com.solvd.navigator.controller.LocationController;
 import com.solvd.navigator.controller.NavigationController;
 
@@ -15,13 +16,19 @@ public class MainMenu {
 
     private final NavigationController navigationController;
     private final LocationController locationController;
+    private final RouteController routeController;
     private final EdgeController edgeController;
     private final Scanner scanner;
 
-    public MainMenu(NavigationController navigationController, LocationController locationController, EdgeController edgeController,Scanner scanner) {
+    public MainMenu(NavigationController navigationController,
+                    LocationController locationController,
+                    EdgeController edgeController,
+                    RouteController routeController,
+                    Scanner scanner) {
         this.navigationController = navigationController;
         this.locationController = locationController;
         this.edgeController = edgeController;
+        this.routeController = routeController;
         this.scanner = scanner;
     }
 
@@ -29,12 +36,13 @@ public class MainMenu {
         boolean running = true;
 
         while (running) {
-            LOGGER.info("\n=== NAVIGATOR MENU ===");
+            LOGGER.info("=== NAVIGATOR MENU ===");
             LOGGER.info("1. Location options");
             LOGGER.info("2. Edge options");
-            LOGGER.info("3. Find shortest route");
+            LOGGER.info("3. Route options");
+            LOGGER.info("4. Find shortest route");
             LOGGER.info("Q. Quit");
-            LOGGER.info("Choose an option: ");
+            LOGGER.info("Choose an option:");
 
             String option = scanner.nextLine().trim().toUpperCase();
 
@@ -48,6 +56,10 @@ public class MainMenu {
                     break;
 
                 case "3":
+                    new RouteMenu(routeController, scanner).start();
+                    break;
+
+                case "4":
                     runFindShortestRoute();
                     break;
 

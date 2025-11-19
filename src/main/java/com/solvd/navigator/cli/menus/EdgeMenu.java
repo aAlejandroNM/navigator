@@ -30,7 +30,7 @@ public class EdgeMenu {
 
     public void start() {
         while (true) {
-            LOGGER.info("\n=== EDGE OPTIONS ===");
+            LOGGER.info("=== EDGE OPTIONS ===");
             LOGGER.info("1. List all edges");
             LOGGER.info("2. Add edge");
             LOGGER.info("3. Update edge");

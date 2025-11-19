@@ -30,7 +30,7 @@ public class LocationMenu {
 
     public void start() {
         while (true) {
-            LOGGER.info("\n=== LOCATION OPTIONS ===");
+            LOGGER.info("=== LOCATION OPTIONS ===");
             LOGGER.info("1. List all locations");
             LOGGER.info("2. Add location");
             LOGGER.info("3. Update location");
