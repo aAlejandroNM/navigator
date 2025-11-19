@@ -28,6 +28,11 @@ public class RouteController {
     }
 
     public Route addRoute(String name, String description, List<Location> locations) {
+
+        if (locations == null || locations.isEmpty()) {
+            throw new IllegalArgumentException("A route must contain at least 1 location");
+        }
+        
         List<RouteLocation> routeLocations = new ArrayList<>();
         for (int i = 0; i < locations.size(); i++) {
             routeLocations.add(new RouteLocation.Builder()

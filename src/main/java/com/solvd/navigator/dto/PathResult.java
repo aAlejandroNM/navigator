@@ -18,7 +18,7 @@ public record PathResult(
         String formattedDistance = String.format("%.3f", totalDistance);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Total distance: ").append(formattedDistance).append(" graph weight\n");
+        sb.append("Path weight: ").append(formattedDistance).append(" units\n");
         sb.append("Route: ");
 
         for (int i = 0; i < pathLocations.size(); i++) {
