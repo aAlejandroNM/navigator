@@ -1,6 +1,7 @@
 package com.solvd.navigator.cli.commands.location;
 
 import com.solvd.navigator.cli.Command;
+import com.solvd.navigator.controller.LocationController;
 import com.solvd.navigator.model.Location;
 import com.solvd.navigator.cli.util.PaginationUtil;
 import com.solvd.navigator.controller.NavigationController;
@@ -9,10 +10,10 @@ import java.util.List;
 
 public class ListLocationsCommand implements Command {
 
-    private final NavigationController controller;
+    private final LocationController locationController;
 
-    public ListLocationsCommand(NavigationController controller) {
-        this.controller = controller;
+    public ListLocationsCommand(LocationController locationController) {
+        this.locationController = locationController;
     }
 
     @Override
@@ -23,7 +24,7 @@ public class ListLocationsCommand implements Command {
 
     @Override
     public void execute() {
-        List<Location> locations = controller.getAllLocations();
+        List<Location> locations = locationController.getAllLocations();
         PaginationUtil.paginateLocations(locations);
     }
 }

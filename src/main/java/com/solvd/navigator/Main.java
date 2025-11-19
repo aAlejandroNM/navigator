@@ -2,6 +2,7 @@ package com.solvd.navigator;
 
 import com.solvd.navigator.cli.menus.MainMenu;
 import com.solvd.navigator.controller.EdgeController;
+import com.solvd.navigator.controller.LocationController;
 import com.solvd.navigator.controller.NavigationController;
 
 import com.solvd.navigator.dao.mysql.impl.EdgeDao;
@@ -52,8 +53,9 @@ public class Main {
         // -----------------------------
         // 3. CONTROLLER
         // -----------------------------
-        NavigationController controller =
-                new NavigationController(locationService, navigationService);
+        NavigationController navigationController =
+                new NavigationController(navigationService);
+        LocationController locationController = new LocationController(locationService);
         EdgeController edgeController = new EdgeController(edgeService);
 
         // -----------------------------
@@ -61,7 +63,7 @@ public class Main {
         // -----------------------------
         Scanner scanner = new Scanner(System.in);
 
-        MainMenu mainMenu = new MainMenu(controller, edgeController, scanner);
+        MainMenu mainMenu = new MainMenu(navigationController, locationController, edgeController, scanner);
         mainMenu.start();
 
         LOGGER.info("Navigator Application closed.");

@@ -1,7 +1,7 @@
 package com.solvd.navigator.cli.menus;
 
 import com.solvd.navigator.cli.CommandRegistry;
-import com.solvd.navigator.controller.NavigationController;
+import com.solvd.navigator.controller.LocationController;
 import com.solvd.navigator.cli.commands.location.AddLocationCommand;
 import com.solvd.navigator.cli.commands.location.DeleteLocationCommand;
 import com.solvd.navigator.cli.commands.location.ListLocationsCommand;
@@ -19,13 +19,13 @@ public class LocationMenu {
     private final CommandRegistry registry = new CommandRegistry();
     private final Scanner scanner;
 
-    public LocationMenu(NavigationController controller, Scanner scanner) {
+    public LocationMenu(LocationController locationController, Scanner scanner) {
         this.scanner = scanner;
 
-        registry.register(new ListLocationsCommand(controller));
-        registry.register(new AddLocationCommand(controller));
-        registry.register(new UpdateLocationCommand(controller));
-        registry.register(new DeleteLocationCommand(controller));
+        registry.register(new ListLocationsCommand(locationController));
+        registry.register(new AddLocationCommand(locationController));
+        registry.register(new UpdateLocationCommand(locationController));
+        registry.register(new DeleteLocationCommand(locationController));
     }
 
     public void start() {

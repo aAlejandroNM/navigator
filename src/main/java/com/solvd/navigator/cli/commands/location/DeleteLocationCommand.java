@@ -1,6 +1,7 @@
 package com.solvd.navigator.cli.commands.location;
 
 import com.solvd.navigator.cli.Command;
+import com.solvd.navigator.controller.LocationController;
 import com.solvd.navigator.controller.NavigationController;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,12 +11,12 @@ import java.util.Scanner;
 
 public class DeleteLocationCommand implements Command {
 
-    private final NavigationController controller;
+    private final LocationController locationController;
     private final Scanner scanner = new Scanner(System.in);
     private static final Logger LOGGER = LogManager.getLogger(DeleteLocationCommand.class);
 
-    public DeleteLocationCommand(NavigationController controller) {
-        this.controller = controller;
+    public DeleteLocationCommand(LocationController locationController) {
+        this.locationController = locationController;
     }
 
     @Override
@@ -30,7 +31,7 @@ public class DeleteLocationCommand implements Command {
         Long id = Long.valueOf(scanner.nextLine());
 
         try {
-            boolean ok = controller.deleteLocation(id);
+            boolean ok = locationController.deleteLocation(id);
             LOGGER.info(ok ? "Deleted successfully." : "Location not found.");
         } catch (Exception e) {
             LOGGER.info("Cannot delete: {}", e.getMessage());

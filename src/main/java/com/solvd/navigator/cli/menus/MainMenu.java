@@ -1,6 +1,7 @@
 package com.solvd.navigator.cli.menus;
 
 import com.solvd.navigator.controller.EdgeController;
+import com.solvd.navigator.controller.LocationController;
 import com.solvd.navigator.controller.NavigationController;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,12 +13,14 @@ public class MainMenu {
 
     private static final Logger LOGGER = LogManager.getLogger(MainMenu.class);
 
-    private final NavigationController controller;
+    private final NavigationController navigationController;
+    private final LocationController locationController;
     private final EdgeController edgeController;
     private final Scanner scanner;
 
-    public MainMenu(NavigationController controller, EdgeController edgeController,Scanner scanner) {
-        this.controller = controller;
+    public MainMenu(NavigationController navigationController, LocationController locationController, EdgeController edgeController,Scanner scanner) {
+        this.navigationController = navigationController;
+        this.locationController = locationController;
         this.edgeController = edgeController;
         this.scanner = scanner;
     }
@@ -37,7 +40,7 @@ public class MainMenu {
 
             switch (option) {
                 case "1":
-                    new LocationMenu(controller, scanner).start();
+                    new LocationMenu(locationController, scanner).start();
                     break;
 
                 case "2":
@@ -68,7 +71,7 @@ public class MainMenu {
         String target = scanner.nextLine().trim();
 
         try {
-            var result = controller.findPath(source, target);
+            var result = navigationController.findPath(source, target);
 
             if (result == null || !result.pathExists()) {
                 LOGGER.warn("No route found between {} and {}.", source, target);
