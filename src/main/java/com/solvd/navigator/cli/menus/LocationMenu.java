@@ -23,9 +23,9 @@ public class LocationMenu {
         this.scanner = scanner;
 
         registry.register(new ListLocationsCommand(locationController));
-        registry.register(new AddLocationCommand(locationController));
-        registry.register(new UpdateLocationCommand(locationController));
-        registry.register(new DeleteLocationCommand(locationController));
+        registry.register(new AddLocationCommand(locationController, scanner));
+        registry.register(new UpdateLocationCommand(locationController, scanner));
+        registry.register(new DeleteLocationCommand(locationController, scanner));
     }
 
     public void start() {

@@ -2,14 +2,10 @@ package com.solvd.navigator.controller;
 
 import com.solvd.navigator.model.Location;
 import com.solvd.navigator.service.LocationService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 public class LocationController {
-
-    private static final Logger LOGGER = LogManager.getLogger(LocationController.class);
 
     private final LocationService locationService;
 

@@ -23,9 +23,9 @@ public class EdgeMenu {
         this.scanner = scanner;
 
         registry.register(new ListEdgesCommand(controller));
-        registry.register(new AddEdgeCommand(controller));
-        registry.register(new UpdateEdgeCommand(controller));
-        registry.register(new DeleteEdgeCommand(controller));
+        registry.register(new AddEdgeCommand(controller, scanner));
+        registry.register(new UpdateEdgeCommand(controller, scanner));
+        registry.register(new DeleteEdgeCommand(controller, scanner));
     }
 
     public void start() {
