@@ -12,11 +12,12 @@ import java.util.Scanner;
 public class UpdateLocationCommand implements Command {
 
     private final LocationController locationController;
-    private final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner;
     private static final Logger LOGGER = LogManager.getLogger(UpdateLocationCommand.class);
 
-    public UpdateLocationCommand(LocationController locationController) {
+    public UpdateLocationCommand(LocationController locationController, Scanner scanner) {
         this.locationController = locationController;
+        this.scanner = scanner;
     }
 
     @Override

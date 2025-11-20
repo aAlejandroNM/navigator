@@ -11,11 +11,12 @@ import java.util.Scanner;
 public class AddEdgeCommand implements Command {
 
     private final EdgeController controller;
-    private final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner;
     private static final Logger LOGGER = LogManager.getLogger(AddEdgeCommand.class);
 
-    public AddEdgeCommand(EdgeController controller) {
+    public AddEdgeCommand(EdgeController controller, Scanner scanner) {
         this.controller = controller;
+        this.scanner = scanner;
     }
 
     @Override

@@ -1,5 +1,11 @@
 package com.solvd.navigator.cli.menus;
 
+import com.solvd.navigator.model.Edge;
+import com.solvd.navigator.model.Location;
+import com.solvd.navigator.util.FloydWarshall;
+import com.solvd.navigator.cli.util.LocationMapRenderer;
+import com.solvd.navigator.cli.util.AdjacencyMatrixPrinter;
+
 import com.solvd.navigator.controller.EdgeController;
 import com.solvd.navigator.controller.RouteController;
 import com.solvd.navigator.controller.LocationController;
@@ -8,6 +14,9 @@ import com.solvd.navigator.controller.NavigationController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class MainMenu {
@@ -41,34 +50,41 @@ public class MainMenu {
             LOGGER.info("2. Edge options");
             LOGGER.info("3. Route options");
             LOGGER.info("4. Find shortest route");
+            LOGGER.info("5. Visualize the graph");
+            LOGGER.info("6. Print adjacency matrix");
             LOGGER.info("Q. Quit");
             LOGGER.info("Choose an option:");
 
             String option = scanner.nextLine().trim().toUpperCase();
 
             switch (option) {
-                case "1":
-                    new LocationMenu(locationController, scanner).start();
-                    break;
+                case "1" -> new LocationMenu(locationController, scanner).start();
 
-                case "2":
-                    new EdgeMenu(edgeController, scanner).start();
-                    break;
+                case "2" -> new EdgeMenu(edgeController, scanner).start();
 
-                case "3":
-                    new RouteMenu(routeController, scanner).start();
-                    break;
+                case "3" -> new RouteMenu(routeController, scanner).start();
 
-                case "4":
-                    runFindShortestRoute();
-                    break;
+                case "4" -> runFindShortestRoute();
 
-                case "Q":
-                    running = false;
-                    break;
+                case "5" -> visualizeGraph();
 
-                default:
-                    LOGGER.warn("Invalid option, please try again.");
+                case "6" -> {
+                    var locations = locationController.getAllLocations();
+                    var edges = edgeController.getAllEdges();
+
+                    Map<Long, Integer> idToIndex = new HashMap<>();
+                    for (int i = 0; i < locations.size(); i++) {
+                        idToIndex.put(locations.get(i).getId(), i);
+                    }
+
+                    var result = FloydWarshall.compute(locations.size(), edges, idToIndex);
+
+                    AdjacencyMatrixPrinter.print(result.distanceMatrix());
+                }
+
+                case "Q" -> running = false;
+
+                default -> LOGGER.warn("Invalid option, please try again.");
             }
         }
 
@@ -94,5 +110,13 @@ public class MainMenu {
         } catch (Exception e) {
             LOGGER.error("Error calculating shortest route: {}", e.getMessage());
         }
+    }
+
+    private void visualizeGraph() {
+        List<Location> locations = locationController.getAllLocations();
+        List<Edge> edges = edgeController.getAllEdges(); // or routeController, etc.
+
+        LocationMapRenderer renderer = new LocationMapRenderer();
+        renderer.renderGraph(locations, edges);
     }
 }

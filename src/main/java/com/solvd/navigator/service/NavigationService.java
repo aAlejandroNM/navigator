@@ -145,10 +145,6 @@ public class NavigationService {
         return null;
     }
 
-    public boolean isComputed() {
-        return isComputed;
-    }
-
     // Static helper
     public static NavigationService fromDaos(ILocationDao locationDao,
                                              IEdgeDao edgeDao,
